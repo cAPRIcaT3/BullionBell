@@ -24,9 +24,11 @@ class EconomicDataModel(QAbstractTableModel):
             return self._data.columns[section]
         return None
 
+
 class App(QWidget):
     def __init__(self):
         super().__init__()
+        self.overlay_active = False  # State to track overlay status
         self.initUI()
 
     def initUI(self):
@@ -34,12 +36,16 @@ class App(QWidget):
         self.setWindowOpacity(0.8)
 
         self.tableView = QTableView(self)
-        self.button = QPushButton('Get Economic Calendar', self)
-        self.button.clicked.connect(self.get_economic_data)
+        self.getDataButton = QPushButton('Get Economic Calendar', self)
+        self.getDataButton.clicked.connect(self.get_economic_data)
+
+        self.toggleButton = QPushButton('Toggle Overlay', self)
+        self.toggleButton.clicked.connect(self.toggle_overlay)  # Connect to toggle function
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.tableView)
-        layout.addWidget(self.button)
+        layout.addWidget(self.getDataButton)
+        layout.addWidget(self.toggleButton)  # Add the toggle button to the layout
 
         self.setLayout(layout)
         self.setWindowTitle('Forex Economic Calendar')
@@ -49,6 +55,11 @@ class App(QWidget):
         data = investpy.economic_calendar(from_date='20/09/2024', to_date='27/09/2024')
         model = EconomicDataModel(data)
         self.tableView.setModel(model)
+
+    def toggle_overlay(self):
+        self.overlay_active = not self.overlay_active
+        self.setWindowOpacity(0.1 if self.overlay_active else 0.8)  # Adjust opacity based on state
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

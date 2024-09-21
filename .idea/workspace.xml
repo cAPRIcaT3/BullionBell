@@ -29,7 +29,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
   </component>
-  <component name="RunManager" selected="Python.awsintro">
+  <component name="RunManager" selected="Python.bullion_ui">
     <configuration name="awsintro" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="BullionBell" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -74,8 +74,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.awsintro" />
         <item itemvalue="Python.bullion_ui" />
+        <item itemvalue="Python.awsintro" />
       </list>
     </recent_temporary>
   </component>
