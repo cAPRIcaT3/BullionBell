@@ -1,0 +1,4 @@
+investpy
+PyQt5==5.15.11
+psycopg2
+pytz
