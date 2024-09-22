@@ -1,16 +1,14 @@
-# This is a sample Python script.
+import sys
+from PyQt5.QtWidgets import QApplication
+from ui.bullion_ui import MainApp
+from ui.system_tray import setup_system_tray
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+def main():
+    app = QApplication(sys.argv)
+    main_window = MainApp()
+    tray_icon = setup_system_tray(app, main_window)  # Setup system tray
+    main_window.show()
+    sys.exit(app.exec_())
 
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    main()
