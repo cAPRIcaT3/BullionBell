@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from ui.bullion_ui import MainApp
 from ui.system_tray import setup_system_tray
+from pynput import keyboard
 
 def main():
     app = QApplication(sys.argv)

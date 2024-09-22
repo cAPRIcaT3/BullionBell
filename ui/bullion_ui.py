@@ -2,6 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QTableView
 from PyQt5.QtCore import Qt, QAbstractTableModel
 import investpy
+from pynput import keyboard
 
 class EconomicDataModel(QAbstractTableModel):
     def __init__(self, data):
@@ -19,20 +20,18 @@ class EconomicDataModel(QAbstractTableModel):
             return str(self._data.iloc[index.row(), index.column()])
         return None
 
-    def headerData(self, section, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self._data.columns[section]
-        return None
-
 class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.overlay_active = False
         self.initUI()
+        self.init_keyboard_listener()
 
     def initUI(self):
         self.setWindowTitle('Bullion Bell - Forex Economic Calendar')
         self.setGeometry(300, 300, 600, 400)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput)
+        self.setWindowOpacity(0.8)
 
         centralWidget = QWidget(self)
         self.setCentralWidget(centralWidget)
@@ -56,7 +55,22 @@ class MainApp(QMainWindow):
 
     def toggle_overlay(self):
         self.overlay_active = not self.overlay_active
-        self.setWindowOpacity(0.1 if self.overlay_active else 0.8)
+        self.update_window_flags()
+
+    def update_window_flags(self):
+        if self.overlay_active:
+            self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.WindowTransparentForInput)
+            self.setWindowOpacity(0.1)
+        else:
+            self.setWindowFlags(Qt.WindowStaysOnTopHint)
+            self.setWindowOpacity(0.8)
+        self.show()  # Apply the new window flags
+
+    def init_keyboard_listener(self):
+        listener = keyboard.GlobalHotKeys({
+            '<alt>+<shift>+a': self.toggle_overlay
+        })
+        listener.start()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
