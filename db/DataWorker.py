@@ -1,24 +1,34 @@
 import investpy
-import wx
 import threading
-from wx.lib.newevent import NewEvent
+import wx
 
-# Create a new custom event to pass data between threads
-DataFetchedEvent, EVT_DATA_FETCHED = NewEvent()
+# Define a custom event type for data fetching
+EVT_DATA_FETCHED = wx.NewEventType()
+EVT_DATA_FETCHED_BINDER = wx.PyEventBinder(EVT_DATA_FETCHED, 1)
 
-class DataWorker(threading.Thread):  # Use threading.Thread instead of wx.Thread
+class DataWorker(threading.Thread):
     def __init__(self, from_date, to_date, parent):
-        super().__init__()
+        threading.Thread.__init__(self)
         self.from_date = from_date
         self.to_date = to_date
-        self.parent = parent  # Store the parent to post events back to UI
+        self.parent = parent
 
     def run(self):
+        # Fetch data from investpy (make sure investpy is installed and up to date)
         try:
-            # Perform the data fetching operation
             data = investpy.economic_calendar(from_date=self.from_date, to_date=self.to_date)
-            # Use CallAfter to post an event to the UI thread
-            wx.CallAfter(wx.PostEvent, self.parent, DataFetchedEvent(data=data))
+            print("Raw Data Fetched:", data)  # Debugging statement to see the raw fetched data
+
+            if data is not None:
+                # Send data to the main thread using wx.CallAfter
+                wx.CallAfter(self.send_data_to_main_thread, data)
         except Exception as e:
-            # Post an event with data set to None in case of error
-            wx.CallAfter(wx.PostEvent, self.parent, DataFetchedEvent(data=None))
+            print(f"Error fetching data: {e}")
+            # Send None in case of error
+            wx.CallAfter(self.send_data_to_main_thread, None)
+
+    def send_data_to_main_thread(self, data):
+        # Create and post an event to the main thread with fetched data
+        event = wx.PyCommandEvent(EVT_DATA_FETCHED, id=self.parent.GetId())
+        event.data = data
+        wx.PostEvent(self.parent, event)
