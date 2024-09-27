@@ -1,19 +1,46 @@
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
-from PyQt5.QtGui import QIcon
+import wx
+from wx.adv import TaskBarIcon  # Import TaskBarIcon from wx.adv
 
-def setup_system_tray(app, window):
-    trayIcon = QSystemTrayIcon(QIcon("path/to/icon.png"), app)  # Ensure you have an icon
-    trayIcon.setToolTip("Bullion Bell Running")
+class MyTaskBarIcon(TaskBarIcon):
+    def __init__(self, frame):
+        super(MyTaskBarIcon, self).__init__()
+        self.frame = frame
 
-    trayMenu = QMenu()
-    openAction = QAction("Open", trayMenu)
-    openAction.triggered.connect(window.show)
-    trayMenu.addAction(openAction)
+        # Set up the icon
+        icon = wx.Icon("resources/icons/App/BullionBell.png", wx.BITMAP_TYPE_PNG)
+        self.SetIcon(icon, "Bullion Bell Running")
 
-    exitAction = QAction("Exit", trayMenu)
-    exitAction.triggered.connect(app.quit)
-    trayMenu.addAction(exitAction)
+        # Bind event for left-click
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_UP, self.on_left_click)
 
-    trayIcon.setContextMenu(trayMenu)
-    trayIcon.show()
-    return trayIcon  # Return to keep a reference
+    def on_left_click(self, event):
+        # Show or hide the frame on left click
+        if self.frame.IsShown():
+            self.frame.Hide()
+        else:
+            self.frame.Show()
+
+    def CreatePopupMenu(self):
+        # Create a right-click context menu
+        menu = wx.Menu()
+        open_menu = menu.Append(wx.ID_OPEN, 'Open')
+        exit_menu = menu.Append(wx.ID_EXIT, 'Exit')
+
+        self.Bind(wx.EVT_MENU, self.on_open, open_menu)
+        self.Bind(wx.EVT_MENU, self.on_exit, exit_menu)
+
+        return menu
+
+    def on_open(self, event):
+        self.frame.Show()
+
+    def on_exit(self, event):
+        wx.CallAfter(self.frame.Close)
+
+# Ensure this script runs properly if called directly
+if __name__ == '__main__':
+    app = wx.App(False)
+    frame = wx.Frame(None, wx.ID_ANY, "Test")
+    tbicon = MyTaskBarIcon(frame)
+    frame.Show()
+    app.MainLoop()
