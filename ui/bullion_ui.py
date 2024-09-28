@@ -7,6 +7,7 @@ import wx.grid
 from pynput import keyboard
 from db.DataWorker import DataWorker, EVT_DATA_FETCHED_BINDER  # Use the custom event binder
 from wx.adv import TaskBarIcon
+import datetime
 
 
 def handle_data_fetched(self, event):
@@ -188,9 +189,18 @@ class MainApp(wx.Frame):
         self.Fit()
         self.Centre()
 
+    import datetime
+
     def start_data_fetch(self, event):
-        # Create and start the data fetching thread
-        self.worker = DataWorker('20/09/2024', '27/09/2024', self)
+        # Calculate current date and a range for data retrieval
+        today = datetime.date.today()
+        from_date = (today - datetime.timedelta(days=1)).strftime('%d/%m/%Y')  # 1 day before today
+        to_date = (today + datetime.timedelta(days=7)).strftime('%d/%m/%Y')  # 7 days after today
+
+        print(f"Fetching economic calendar from {from_date} to {to_date}")  # Debug statement
+
+        # Create and start the data fetching thread with the detected date range
+        self.worker = DataWorker(from_date, to_date, self)
         self.worker.start()
 
     def handle_data_fetched(self, event):
