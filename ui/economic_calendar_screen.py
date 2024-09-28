@@ -2,6 +2,7 @@ import wx
 import wx.grid
 from db.DataWorker import DataWorker, EVT_DATA_FETCHED_BINDER
 from datetime import datetime, timedelta
+from ui.main_screen import MainScreen
 
 
 class EconomicCalendarScreen(wx.Panel):
@@ -17,22 +18,38 @@ class EconomicCalendarScreen(wx.Panel):
         self.initUI()
 
     def initUI(self):
-        # Create a vertical box sizer for the main layout
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        # Create a toolbar with a 'Select Columns' button
-        toolbar = wx.ToolBar(self, style=wx.TB_HORIZONTAL | wx.NO_BORDER)
-        select_columns_tool = toolbar.AddTool(wx.ID_ANY, 'Toggle columns', wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW))
-        toolbar.AddControl(wx.StaticText(toolbar, label=" Toggle columns"))  # Add static text next to the icon
-        toolbar.Realize()
-        self.Bind(wx.EVT_TOOL, self.open_settings_dialog, select_columns_tool)
-        vbox.Add(toolbar, 0, wx.EXPAND)
+        # Create a toolbar sizer with horizontal alignment
+        toolbar_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # Home Button
+        home_icon = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR, (16, 16))
+        home_text = wx.StaticText(self, label = "Back to Main")
+        self.homeButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=home_icon, size=(32, 32))
+        self.homeButton.Bind(wx.EVT_BUTTON, self.on_back_to_home)
+        toolbar_sizer.Add(self.homeButton, 0, wx.ALL, 5)
+
+        # Toggle Columns Button
+        toggle_icon = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR, (16, 16))
+        toggle_text = wx.StaticText(self, label="Toggle columns")
+        toggle_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.toggleButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=toggle_icon, size=(32, 32))
+        self.toggleButton.Bind(wx.EVT_BUTTON, self.open_settings_dialog)
+        toggle_box.Add(self.toggleButton, 0, wx.ALL, 5)
+        toggle_box.Add(toggle_text, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+
+        # Add both buttons to the toolbar sizer
+        toolbar_sizer.Add(toggle_box, 0, wx.ALL, 5)
+
+        # Add the toolbar sizer to the main vertical sizer
+        vbox.Add(toolbar_sizer, 0, wx.EXPAND | wx.ALL, 5)
 
         # Create a table (grid) view for displaying economic calendar data
         self.tableView = wx.grid.Grid(self)
         self.tableView.CreateGrid(0, 10)
 
-        # Set column labels based on required fields
+        # Set column labels
         columns = ["ID", "Date", "Time", "Zone", "Currency", "Importance", "Event", "Actual", "Forecast", "Previous"]
         for col_index, col_label in enumerate(columns):
             self.tableView.SetColLabelValue(col_index, col_label)
@@ -41,9 +58,6 @@ class EconomicCalendarScreen(wx.Panel):
         for col in range(10):
             self.tableView.SetColSize(col, 100)
 
-        # Hide default row labels to eliminate empty space
-        self.tableView.SetRowLabelSize(0)
-
         # Add the grid to the layout
         vbox.Add(self.tableView, 1, wx.EXPAND | wx.ALL, 5)
 
@@ -51,6 +65,10 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Bind the custom data fetched event
         self.Bind(EVT_DATA_FETCHED_BINDER, self.handle_data_fetched)
+
+    def on_back_to_home(self, event):
+        """Navigate back to the main screen."""
+        self.GetParent().GetParent().switch_screen(MainScreen)
 
     def open_settings_dialog(self, event):
         """Open a dialog to toggle fields on and off."""
