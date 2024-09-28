@@ -25,22 +25,33 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Home Button
         home_icon = wx.ArtProvider.GetBitmap(wx.ART_GO_HOME, wx.ART_TOOLBAR, (16, 16))
-        home_text = wx.StaticText(self, label = "Back to Main")
-        self.homeButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=home_icon, size=(32, 32))
-        self.homeButton.Bind(wx.EVT_BUTTON, self.on_back_to_home)
-        toolbar_sizer.Add(self.homeButton, 0, wx.ALL, 5)
+        home_text = wx.StaticText(self, label="Back to Main")
+        homeButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=home_icon, size=(32, 32))
+        homeButton.Bind(wx.EVT_BUTTON, self.on_back_to_home)
+
+        # Add Home Button and text
+        home_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        home_sizer.Add(homeButton, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        home_sizer.Add(home_text, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        toolbar_sizer.Add(home_sizer, 0, wx.ALL, 5)
+
+        # Spacer to create a gap between buttons
+        toolbar_sizer.Add((20, 0), 0, wx.EXPAND)
 
         # Toggle Columns Button
         toggle_icon = wx.ArtProvider.GetBitmap(wx.ART_LIST_VIEW, wx.ART_TOOLBAR, (16, 16))
         toggle_text = wx.StaticText(self, label="Toggle columns")
-        toggle_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.toggleButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=toggle_icon, size=(32, 32))
-        self.toggleButton.Bind(wx.EVT_BUTTON, self.open_settings_dialog)
-        toggle_box.Add(self.toggleButton, 0, wx.ALL, 5)
-        toggle_box.Add(toggle_text, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        toggleButton = wx.BitmapButton(self, id=wx.ID_ANY, bitmap=toggle_icon, size=(32, 32))
+        toggleButton.Bind(wx.EVT_BUTTON, self.open_settings_dialog)
 
-        # Add both buttons to the toolbar sizer
-        toolbar_sizer.Add(toggle_box, 0, wx.ALL, 5)
+        # Add Toggle Button and text
+        toggle_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        toggle_sizer.Add(toggleButton, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        toggle_sizer.Add(toggle_text, 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
+        toolbar_sizer.Add(toggle_sizer, 0, wx.ALL, 5)
+
+        # Add a flexible spacer to push items to the left if needed
+        toolbar_sizer.AddStretchSpacer()
 
         # Add the toolbar sizer to the main vertical sizer
         vbox.Add(toolbar_sizer, 0, wx.EXPAND | wx.ALL, 5)
