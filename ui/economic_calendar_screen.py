@@ -79,7 +79,7 @@ class EconomicCalendarScreen(wx.Panel):
 
     def on_back_to_home(self, event):
         """Navigate back to the main screen."""
-        self.GetParent().GetParent().switch_screen(MainScreen)
+        self.app.switch_screen(MainScreen)
 
     def open_settings_dialog(self, event):
         """Open a dialog to toggle fields on and off."""
