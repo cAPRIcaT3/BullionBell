@@ -7,7 +7,7 @@ class MyTaskBarIcon(TaskBarIcon):
         self.frame = frame
 
         # Set up the icon
-        icon = wx.Icon("resources/icons/App/BullionBell.png", wx.BITMAP_TYPE_PNG)
+        icon = wx.Icon("resources/icons/App/icon.png", wx.BITMAP_TYPE_PNG)
         self.SetIcon(icon, "Bullion Bell Running")
 
         # Bind event for left-click

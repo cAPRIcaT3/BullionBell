@@ -190,7 +190,7 @@ class MainApp(wx.Frame):
         # Resize columns to fit content
         self.tableView.AutoSizeColumns()
         self.resize_window_to_fit()  # Resize window to fit content after updating data
-        print("Table update complete.") 
+        print("Table update complete.")
 
     def toggle_overlay(self, event=None):
         self.logger.debug('Toggling overlay')
