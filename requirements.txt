@@ -1,4 +1,2 @@
 investpy
 wxPython==4.2.2
-psycopg2
-pytz
