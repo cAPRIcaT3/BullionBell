@@ -19,9 +19,12 @@ class DataWorker(threading.Thread):
             data = investpy.economic_calendar(from_date=self.from_date, to_date=self.to_date)
             print("Raw Data Fetched:", data)  # Debugging statement to see the raw fetched data
 
-            if data is not None:
-                # Send data to the main thread using wx.CallAfter
-                wx.CallAfter(self.send_data_to_main_thread, data)
+            if data is not None and not data.empty:  # Check if data is not empty
+                # Convert DataFrame to a list of dictionaries for easier handling
+                data_list = data.to_dict(orient='records')
+                wx.CallAfter(self.send_data_to_main_thread, data_list)
+            else:
+                wx.CallAfter(self.send_data_to_main_thread, None)
         except Exception as e:
             print(f"Error fetching data: {e}")
             # Send None in case of error

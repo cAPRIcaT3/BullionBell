@@ -1,10 +1,52 @@
 import sys
+import os
 import logging
 import investpy
 import wx
 import wx.grid
 from pynput import keyboard
 from db.DataWorker import DataWorker, EVT_DATA_FETCHED_BINDER  # Use the custom event binder
+from wx.adv import TaskBarIcon
+
+
+def handle_data_fetched(self, event):
+    data = event.data
+    if data is not None and isinstance(data, list):
+        print("Data received:", data)  # Debugging statement to see received data
+        self.update_table(data)
+    else:
+        self.logger.error("Failed to fetch data or data format is incorrect")
+        print("Error: Data received is not in the expected format.")
+
+
+# TaskBar Icon Implementation
+class TaskBarIcon(wx.adv.TaskBarIcon):
+    def __init__(self, frame, icon_path):
+        wx.adv.TaskBarIcon.__init__(self)
+        self.frame = frame
+        self.set_icon(icon_path)
+        self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_click)
+
+    def CreatePopupMenu(self):
+        menu = wx.Menu()
+        exit_menu_item = wx.MenuItem(menu, wx.ID_EXIT, 'Exit')
+        menu.Append(exit_menu_item)
+        self.Bind(wx.EVT_MENU, self.on_exit, exit_menu_item)
+        return menu
+
+    def set_icon(self, path):
+        # Use a different method to set the taskbar icon for compatibility
+        icon = wx.Icon(wx.Bitmap(path))
+        self.SetIcon(icon, 'Bullion Bell Running')
+
+    def on_left_click(self, event):
+        if self.frame.IsShown():
+            self.frame.Hide()
+        else:
+            self.frame.Show()
+
+    def on_exit(self, event):
+        wx.CallAfter(self.frame.Close)
 
 
 class MainApp(wx.Frame):
@@ -73,6 +115,18 @@ class MainApp(wx.Frame):
         self.Centre()
         self.Show()
         self.resize_window_to_fit()  # Initial resize based on visibility
+
+        # Set the icon for the application window
+        icon_path = os.path.join('resources', 'icons', 'App', 'icon.png')  # Path to your icon file
+        if os.path.exists(icon_path):
+            # Load the .png icon and set it to the frame
+            icon = wx.Icon(wx.Bitmap(icon_path))
+            self.SetIcon(icon)
+        else:
+            self.logger.error(f"Icon file not found at path: {icon_path}")
+
+        # Setup TaskBar Icon
+        self.taskbar_icon = TaskBarIcon(self, icon_path)
 
     def open_settings_dialog(self, event):
         """Open a dialog to toggle fields on and off."""
@@ -149,8 +203,12 @@ class MainApp(wx.Frame):
 
     def update_table(self, data):
         # Clear existing data and reset grid
-        self.tableView.ClearGrid()
-        self.tableView.DeleteRows(0, self.tableView.GetNumberRows(), True)
+        current_rows = self.tableView.GetNumberRows()
+        print(f"Current number of rows in the table: {current_rows}")
+
+        # Only delete rows if there are rows to delete
+        if current_rows > 0:
+            self.tableView.DeleteRows(0, current_rows, True)
 
         # Log number of rows and columns
         print(f"Number of rows to add: {len(data)}, Columns: {self.tableView.GetNumberCols()}")

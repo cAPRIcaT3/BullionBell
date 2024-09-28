@@ -1,7 +1,6 @@
 import sys
 import wx
 from ui.bullion_ui import MainApp
-from ui.system_tray import MyTaskBarIcon  # Updated import for wxPython system tray
 from utils.logger import setup_logging
 
 
@@ -12,9 +11,6 @@ def main():
     try:
         app = wx.App(False)  # Initialize the wxPython application
         main_window = MainApp(None, title="Bullion Bell - Forex Economic Calendar")
-
-        # Setup system tray
-        tray_icon = MyTaskBarIcon(main_window)
 
         # Show the main window
         main_window.Show()
