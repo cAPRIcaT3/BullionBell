@@ -3,6 +3,7 @@ import wx.grid
 from db.DataWorker import DataWorker, EVT_DATA_FETCHED_BINDER
 from datetime import datetime, timedelta
 from ui.main_screen import MainScreen
+from utils.cache_handler import CacheHandler
 
 
 class EconomicCalendarScreen(wx.Panel):
@@ -16,6 +17,7 @@ class EconomicCalendarScreen(wx.Panel):
         }
         self.fixed_height = 450  # Adjust fixed height as needed to account for the toolbar
         self.initUI()
+        self.cache_handler = CacheHandler()
 
     def initUI(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -147,13 +149,20 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Automatically set the date range based on current date
         current_date = datetime.now()
-        start_date = current_date - timedelta(days=3)  # Start date is 3 days before current date
+        start_date = current_date - timedelta(days=1)  # Start date is 3 days before current date
         end_date = current_date + timedelta(days=7)  # End date is 7 days after current date
+
+        # Load cached data within the desired date range
+        cached_data = self.cache_handler.get_cached_data(start_date, end_date)
+        if cached_data:
+            self.app.logger.info(f"Loaded {len(cached_data)} records from cache.")
+            self.update_table(cached_data)
 
         # Format the dates as required by the investpy API (DD/MM/YYYY)
         formatted_start_date = start_date.strftime('%d/%m/%Y')
         formatted_end_date = end_date.strftime('%d/%m/%Y')
 
+        # Fetch data from the API for the desired range and merge with cache
         self.app.logger.info(f"Fetching data from {formatted_start_date} to {formatted_end_date}")
         self.worker = DataWorker(formatted_start_date, formatted_end_date, self)
         self.worker.start()
@@ -162,6 +171,7 @@ class EconomicCalendarScreen(wx.Panel):
         data = event.data
         if data is not None and isinstance(data, list):
             self.app.logger.info(f"Data received: {data}")
+            self.cache_handler.add_to_cache(data)  # Save fetched data to cache
             self.update_table(data)
         else:
             self.app.logger.error("Failed to fetch data or data format is incorrect")
