@@ -1,2 +1,10 @@
+lxml
+numpy
+pandas
+pytz
+requests
+setuptools
+Unidecode
 investpy
 wxPython==4.2.2
+playsound
