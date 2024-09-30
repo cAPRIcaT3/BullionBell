@@ -10,10 +10,9 @@ class EconomicCalendarScreen(wx.Panel):
     def __init__(self, parent, app):
         super(EconomicCalendarScreen, self).__init__(parent)
         self.app = app  # Store the MainApp instance
-        self.columns_visibility = {  # Keep track of visible columns
-            'ID': True, 'Date': True, 'Time': True, 'Zone': True,
-            'Currency': True, 'Importance': True, 'Event': True,
-            'Actual': True, 'Forecast': True, 'Previous': True
+        self.columns_visibility = {
+            'Date': True, 'Time': True, 'Zone': True, 'Currency': True,
+            'Importance': True, 'Event': True, 'Actual': True, 'Forecast': True, 'Previous': True
         }
         self.fixed_height = 450  # Adjust fixed height as needed to account for the toolbar
         self.initUI()
@@ -149,7 +148,7 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Automatically set the date range based on current date
         current_date = datetime.now()
-        start_date = current_date - timedelta(days=1)  # Start date is 3 days before current date
+        start_date = current_date - timedelta(days=1)  # Start date is 1 day before current date
         end_date = current_date + timedelta(days=7)  # End date is 7 days after current date
 
         # Load cached data within the desired date range
@@ -179,6 +178,7 @@ class EconomicCalendarScreen(wx.Panel):
     def update_table(self, data):
         # Clear existing data and reset grid
         self.tableView.ClearGrid()
+        self.tableView.SetRowLabelSize(0)  # This will hide the row labels (serial numbers)
         if self.tableView.GetNumberRows() > 0:
             self.tableView.DeleteRows(0, self.tableView.GetNumberRows(), True)
 
@@ -187,12 +187,12 @@ class EconomicCalendarScreen(wx.Panel):
         if num_rows > 0:
             self.tableView.AppendRows(num_rows)
 
-        # Populate grid with data
+        # Populate grid with data (skip the first "ID" column)
         for row_index, row in enumerate(data):
             if isinstance(row, dict) and all(k in row for k in
                                              ['id', 'date', 'time', 'zone', 'currency', 'importance', 'event', 'actual',
                                               'forecast', 'previous']):
-                self.tableView.SetCellValue(row_index, 0, str(row['id']))
+                # Skip setting the first column (ID)
                 self.tableView.SetCellValue(row_index, 1, row['date'])
                 self.tableView.SetCellValue(row_index, 2, row['time'] or 'N/A')
                 self.tableView.SetCellValue(row_index, 3, row['zone'] or 'N/A')
@@ -205,11 +205,24 @@ class EconomicCalendarScreen(wx.Panel):
             else:
                 self.app.logger.error(f"Unexpected row type or missing keys: {type(row)}. Content: {row}")
 
-        # Refresh the grid display to make sure everything is updated
-        self.tableView.ForceRefresh()
-        wx.CallLater(100, self.Refresh)  # Ensure a full UI refresh after grid update
-
-        # Resize columns to fit content
+        # Auto-resize columns to fit the content
         self.tableView.AutoSizeColumns()
-        self.resize_window_to_fit()  # Resize window to fit content after updating data
+
+        # Hide the first column (ID)
+        self.tableView.SetColSize(0, 0)
+
+        # Resize the window to fit the content
+        self.resize_window_to_fit()
+
         self.app.logger.info("Table update complete.")
+
+    def resize_window_to_fit(self):
+        """Resize window to fit table contents and maintain a fixed height."""
+        total_width = sum(
+            [self.tableView.GetColSize(col) for col in range(1, self.tableView.GetNumberCols())])  # Skip ID column
+        required_width = total_width + 50  # Add some padding
+
+        # Resize the app window based on content
+        self.app.SetSize(wx.Size(required_width, self.fixed_height))
+        self.app.Fit()  # Ensure everything fits properly
+        self.app.Centre()  # Center the window on the screen
