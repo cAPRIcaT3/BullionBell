@@ -14,9 +14,11 @@ class EconomicCalendarScreen(wx.Panel):
             'Date': True, 'Time': True, 'Zone': True, 'Currency': True,
             'Importance': True, 'Event': True, 'Actual': True, 'Forecast': True, 'Previous': True
         }
-        self.fixed_height = 450  # Adjust fixed height as needed to account for the toolbar
-        self.initUI()
         self.cache_handler = CacheHandler()
+
+        # Initialize the UI
+        self.initUI()
+        self.fixed_height = 450  # Adjust fixed height as needed to account for the toolbar
 
     def initUI(self):
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -59,15 +61,15 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Create a table (grid) view for displaying economic calendar data
         self.tableView = wx.grid.Grid(self)
-        self.tableView.CreateGrid(0, 10)
+        self.tableView.CreateGrid(0, 9)  # Adjust the number of columns to exclude ID
 
         # Set column labels
-        columns = ["ID", "Date", "Time", "Zone", "Currency", "Importance", "Event", "Actual", "Forecast", "Previous"]
+        columns = ["Date", "Time", "Zone", "Currency", "Importance", "Event", "Actual", "Forecast", "Previous"]
         for col_index, col_label in enumerate(columns):
             self.tableView.SetColLabelValue(col_index, col_label)
 
         # Adjust column sizes
-        for col in range(10):
+        for col in range(9):
             self.tableView.SetColSize(col, 100)
 
         # Add the grid to the layout
@@ -87,7 +89,7 @@ class EconomicCalendarScreen(wx.Panel):
         dialog = wx.Dialog(self, title="Select Columns", size=(300, 400))
         vbox = wx.BoxSizer(wx.VERTICAL)
 
-        # Add checkboxes for each column
+        # Add checkboxes for each column (without 'ID')
         self.checkboxes = {}
         for column, visible in self.columns_visibility.items():
             checkbox = wx.CheckBox(dialog, label=column, style=wx.ALIGN_LEFT)
@@ -125,22 +127,18 @@ class EconomicCalendarScreen(wx.Panel):
         dialog.Destroy()
 
     def resize_window_to_fit(self):
-        """Resize window to the smallest possible width while maintaining a fixed height."""
-        total_width = 0
-        for col_index in range(self.tableView.GetNumberCols()):
-            if self.columns_visibility[self.tableView.GetColLabelValue(col_index)]:
-                total_width += self.tableView.GetColSize(col_index)
+        """Resize window to fit table contents and maintain a fixed height."""
+        total_width = sum([self.tableView.GetColSize(col) for col in range(self.tableView.GetNumberCols())])
+        total_height = self.tableView.GetNumberRows() * self.tableView.GetRowSize(0) + 100  # Add some padding
 
-        # Calculate necessary width only
-        required_width = total_width + 50  # Add some padding
+        required_width = total_width + 50  # Add some padding for width
+        max_initial_height = 450 # Set the maximum height for the initial window
+        required_height = min(max_initial_height, total_height)  # Restrict the initial height
 
-        # Set the frame size with fixed height
-        self.app.SetSize(wx.Size(required_width, self.fixed_height))
-
-        # Force the layout to update and fit contents
-        self.Layout()
-        self.Fit()
-        self.app.Centre()
+        # Resize the app window based on content
+        self.app.SetSize(wx.Size(required_width, required_height))
+        self.app.Fit()  # Ensure everything fits properly
+        self.app.Centre()  # Center the window on the screen
 
     def start_data_fetch(self):
         """Start data fetch when the screen is switched to."""
@@ -187,42 +185,26 @@ class EconomicCalendarScreen(wx.Panel):
         if num_rows > 0:
             self.tableView.AppendRows(num_rows)
 
-        # Populate grid with data (skip the first "ID" column)
+        # Populate grid with data
         for row_index, row in enumerate(data):
             if isinstance(row, dict) and all(k in row for k in
                                              ['id', 'date', 'time', 'zone', 'currency', 'importance', 'event', 'actual',
                                               'forecast', 'previous']):
-                # Skip setting the first column (ID)
-                self.tableView.SetCellValue(row_index, 1, row['date'])
-                self.tableView.SetCellValue(row_index, 2, row['time'] or 'N/A')
-                self.tableView.SetCellValue(row_index, 3, row['zone'] or 'N/A')
-                self.tableView.SetCellValue(row_index, 4, row['currency'] or 'N/A')
-                self.tableView.SetCellValue(row_index, 5, row['importance'] or 'N/A')
-                self.tableView.SetCellValue(row_index, 6, row['event'] or 'N/A')
-                self.tableView.SetCellValue(row_index, 7, str(row['actual']) if row['actual'] else 'N/A')
-                self.tableView.SetCellValue(row_index, 8, str(row['forecast']) if row['forecast'] else 'N/A')
-                self.tableView.SetCellValue(row_index, 9, str(row['previous']) if row['previous'] else 'N/A')
-            else:
-                self.app.logger.error(f"Unexpected row type or missing keys: {type(row)}. Content: {row}")
+                # Fill columns with data (starting from the second column)
+                self.tableView.SetCellValue(row_index, 0, row['date'])
+                self.tableView.SetCellValue(row_index, 1, row['time'] or 'N/A')
+                self.tableView.SetCellValue(row_index, 2, row['zone'] or 'N/A')
+                self.tableView.SetCellValue(row_index, 3, row['currency'] or 'N/A')
+                self.tableView.SetCellValue(row_index, 4, row['importance'] or 'N/A')
+                self.tableView.SetCellValue(row_index, 5, row['event'] or 'N/A')
+                self.tableView.SetCellValue(row_index, 6, str(row['actual']) if row['actual'] else 'N/A')
+                self.tableView.SetCellValue(row_index, 7, str(row['forecast']) if row['forecast'] else 'N/A')
+                self.tableView.SetCellValue(row_index, 8, str(row['previous']) if row['previous'] else 'N/A')
 
         # Auto-resize columns to fit the content
         self.tableView.AutoSizeColumns()
-
-        # Hide the first column (ID)
-        self.tableView.SetColSize(0, 0)
 
         # Resize the window to fit the content
         self.resize_window_to_fit()
 
         self.app.logger.info("Table update complete.")
-
-    def resize_window_to_fit(self):
-        """Resize window to fit table contents and maintain a fixed height."""
-        total_width = sum(
-            [self.tableView.GetColSize(col) for col in range(1, self.tableView.GetNumberCols())])  # Skip ID column
-        required_width = total_width + 50  # Add some padding
-
-        # Resize the app window based on content
-        self.app.SetSize(wx.Size(required_width, self.fixed_height))
-        self.app.Fit()  # Ensure everything fits properly
-        self.app.Centre()  # Center the window on the screen
