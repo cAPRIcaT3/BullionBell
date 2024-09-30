@@ -1,10 +1,13 @@
+import os
+import json
 import wx
 import wx.grid
+import requests
+from io import BytesIO
 from db.DataWorker import DataWorker, EVT_DATA_FETCHED_BINDER
 from datetime import datetime, timedelta
 from ui.main_screen import MainScreen
 from utils.cache_handler import CacheHandler
-
 
 class EconomicCalendarScreen(wx.Panel):
     def __init__(self, parent, app):
@@ -15,6 +18,9 @@ class EconomicCalendarScreen(wx.Panel):
             'Importance': True, 'Event': True, 'Actual': True, 'Forecast': True, 'Previous': True
         }
         self.cache_handler = CacheHandler()
+        self.all_data = []  # This will store all fetched data
+        self.initial_data = []  # This will store only the initial 50 records
+        self.records_displayed = 50  # Initially display only 50 records
 
         # Initialize the UI
         self.initUI()
@@ -75,6 +81,11 @@ class EconomicCalendarScreen(wx.Panel):
         # Add the grid to the layout
         vbox.Add(self.tableView, 1, wx.EXPAND | wx.ALL, 5)
 
+        # Add the "Load Rest" button at the bottom
+        self.load_rest_button = wx.Button(self, label="Load Rest")
+        self.load_rest_button.Bind(wx.EVT_BUTTON, self.on_load_rest)
+        vbox.Add(self.load_rest_button, 0, wx.ALIGN_CENTER | wx.ALL, 5)
+
         self.SetSizer(vbox)
 
         # Bind the custom data fetched event
@@ -132,7 +143,7 @@ class EconomicCalendarScreen(wx.Panel):
         total_height = self.tableView.GetNumberRows() * self.tableView.GetRowSize(0) + 100  # Add some padding
 
         required_width = total_width + 50  # Add some padding for width
-        max_initial_height = 450 # Set the maximum height for the initial window
+        max_initial_height = 450  # Set the maximum height for the initial window
         required_height = min(max_initial_height, total_height)  # Restrict the initial height
 
         # Resize the app window based on content
@@ -168,15 +179,17 @@ class EconomicCalendarScreen(wx.Panel):
         data = event.data
         if data is not None and isinstance(data, list):
             self.app.logger.info(f"Data received: {data}")
+            self.all_data = data
+            self.initial_data = data[:self.records_displayed]  # Only the first 50 records initially
             self.cache_handler.add_to_cache(data)  # Save fetched data to cache
-            self.update_table(data)
+            self.update_table(self.initial_data)
         else:
             self.app.logger.error("Failed to fetch data or data format is incorrect")
 
     def update_table(self, data):
         # Clear existing data and reset grid
         self.tableView.ClearGrid()
-        self.tableView.SetRowLabelSize(0)  # This will hide the row labels (serial numbers)
+        self.tableView.SetRowLabelSize(0)  # Hide row labels (serial numbers)
         if self.tableView.GetNumberRows() > 0:
             self.tableView.DeleteRows(0, self.tableView.GetNumberRows(), True)
 
@@ -190,7 +203,7 @@ class EconomicCalendarScreen(wx.Panel):
             if isinstance(row, dict) and all(k in row for k in
                                              ['id', 'date', 'time', 'zone', 'currency', 'importance', 'event', 'actual',
                                               'forecast', 'previous']):
-                # Fill columns with data (starting from the second column)
+                # Populate the data in columns
                 self.tableView.SetCellValue(row_index, 0, row['date'])
                 self.tableView.SetCellValue(row_index, 1, row['time'] or 'N/A')
                 self.tableView.SetCellValue(row_index, 2, row['zone'] or 'N/A')
@@ -208,3 +221,9 @@ class EconomicCalendarScreen(wx.Panel):
         self.resize_window_to_fit()
 
         self.app.logger.info("Table update complete.")
+
+    def on_load_rest(self, event):
+        """Load the rest of the data when the 'Load Rest' button is clicked."""
+        self.update_table(self.all_data)  # Load all records
+        self.load_rest_button.Hide()  # Hide the button after loading the rest
+        self.Layout()  # Re-layout the window to fit changes
