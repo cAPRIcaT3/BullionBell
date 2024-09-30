@@ -33,8 +33,6 @@ class CustomTaskBarIcon(TaskBarIcon):
         else:
             self.frame.Show()
 
-    def on_exit(self, event):
-        wx.CallAfter(self.frame.Close)
 
 
 class MainApp(wx.Frame):
@@ -46,6 +44,11 @@ class MainApp(wx.Frame):
         self.current_screen = None
         self.initUI()
         self.init_keyboard_listener()
+
+    def on_exit(self, event):
+        self.frame.Close()  # Close the frame
+        wx.CallAfter(self.frame.Destroy)  # Ensure frame is destroyed
+        wx.Exit()  # Terminate the application
 
     def initUI(self):
         panel = wx.Panel(self)
