@@ -2,10 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="49a5e9e5-82f8-427e-82a9-57ae0b4526cb" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/db/country_mapping.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/db/currency_to_emoji.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/resources/icons/flags/EU_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/country_flag_handler.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/BullionBell.log" beforeDir="false" afterPath="$PROJECT_DIR$/BullionBell.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/country_mapping.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ui/economic_calendar_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/ui/economic_calendar_screen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/cache.json" beforeDir="false" afterPath="$PROJECT_DIR$/utils/cache.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,10 +34,11 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../Sociothon24_AI-FoodWasteReduction" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/resources/icons/flags" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\arpit\Desktop\BullionBell\resources\icons\flags" />
       <recent name="C:\Users\arpit\Desktop\BullionBell\resources\icons\App" />
     </key>
   </component>
