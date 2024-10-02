@@ -1,7 +1,7 @@
-2024-10-01 12:27:55,783 - BullionBell - INFO - Starting application
-2024-10-01 12:27:55,793 - BullionBell - INFO - Initializing MainApp UI
-2024-10-01 12:27:56,827 - BullionBell - INFO - Fetching economic calendar data...
-2024-10-01 12:27:56,833 - BullionBell - INFO - Loaded 543 records from cache.
-2024-10-01 12:28:13,661 - BullionBell - INFO - Table update complete.
-2024-10-01 12:28:13,661 - BullionBell - INFO - Fetching data from 30/09/2024 to 08/10/2024
-2024-10-01 12:28:35,236 - BullionBell - INFO - Table update complete.
+2024-10-02 11:05:20,970 - BullionBell - INFO - Starting application
+2024-10-02 11:05:20,989 - BullionBell - INFO - Initializing MainApp UI
+2024-10-02 11:05:22,076 - BullionBell - INFO - Fetching economic calendar data...
+2024-10-02 11:05:22,080 - BullionBell - INFO - Loaded 456 records from cache.
+2024-10-02 11:05:27,063 - BullionBell - INFO - Table update complete.
+2024-10-02 11:05:27,063 - BullionBell - INFO - Fetching data from 01/10/2024 to 09/10/2024
+2024-10-02 11:05:33,852 - BullionBell - INFO - Table update complete.

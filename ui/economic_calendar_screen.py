@@ -9,6 +9,8 @@ from utils.cache_handler import CacheHandler
 from utils.country_flag_handler import CountryFlagHandler
 
 
+import wx.grid
+
 class FlagCellRenderer(wx.grid.GridCellRenderer):
     def __init__(self, flag_bitmap, currency_code):
         wx.grid.GridCellRenderer.__init__(self)
@@ -50,6 +52,7 @@ class FlagCellRenderer(wx.grid.GridCellRenderer):
         Create a new instance of the renderer.
         """
         return FlagCellRenderer(self.flag_bitmap, self.currency_code)
+
 
 
     def GetBestSize(self, grid, attr, dc, row, col):

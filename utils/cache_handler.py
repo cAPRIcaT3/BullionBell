@@ -4,9 +4,13 @@ from datetime import datetime
 
 
 class CacheHandler:
-    def __init__(self, cache_file='cache.json'):
-        """Initialize the CacheHandler with the specified cache file."""
+    def __init__(self, cache_file='cache.json', cache_size=None):
+        """
+        Initialize the CacheHandler with the specified cache file and optional cache size.
+        cache_size: The maximum number of records to keep in the cache (None for unlimited).
+        """
         self.cache_file = os.path.join(os.path.dirname(__file__), cache_file)
+        self.cache_size = cache_size  # Maximum number of items in the cache (None for no limit)
         self.cache = self.load_cache()
 
     def load_cache(self):
@@ -25,46 +29,42 @@ class CacheHandler:
             json.dump(self.cache, f, indent=4)
 
     def get_cached_data(self, start_date, end_date):
-        """Retrieve cached data within the specified date range."""
+        """
+        Retrieve cached data within the specified date range.
+        start_date, end_date: datetime objects representing the date range.
+        Returns a list of cached records within the date range.
+        """
         cached_data = []
         for record in self.cache.get("data", []):
-            record_date = datetime.strptime(record['date'], '%d/%m/%Y')
-            if start_date <= record_date <= end_date:
-                cached_data.append(record)
+            try:
+                # Ensure date format consistency in cache
+                record_date = datetime.strptime(record['date'], '%d/%m/%Y')
+                if start_date <= record_date <= end_date:
+                    cached_data.append(record)
+            except ValueError as e:
+                pass  # Ignore records with invalid date formats
         return cached_data
 
     def add_to_cache(self, new_data):
-        """Add new data to the cache, avoiding duplicates."""
+        """
+        Add new data to the cache, avoiding duplicates based on 'id'.
+        If the cache size is set and exceeds the limit, older records are discarded.
+        """
         existing_ids = {record['id'] for record in self.cache.get("data", [])}
         self.cache.setdefault("data", [])
+
         for record in new_data:
             if record['id'] not in existing_ids:
                 self.cache['data'].append(record)
+
+        # If cache size is limited, discard older records
+        if self.cache_size and len(self.cache['data']) > self.cache_size:
+            # Retain only the most recent `cache_size` records
+            self.cache['data'] = self.cache['data'][-self.cache_size:]
+
         self.save_cache()
 
     def clear_cache(self):
         """Clear the cache data."""
         self.cache = {"data": []}
         self.save_cache()
-
-# Example usage
-if __name__ == "__main__":
-    # Create a CacheHandler instance
-    cache_handler = CacheHandler()
-
-    # Add some sample data to the cache
-    sample_data = [
-        {"id": 1, "date": "01/01/2024", "event": "New Year Event"},
-        {"id": 2, "date": "15/01/2024", "event": "Mid-January Event"}
-    ]
-    cache_handler.add_to_cache(sample_data)
-
-    # Retrieve cached data for a specific date range
-    start_date = datetime.strptime("01/01/2024", '%d/%m/%Y')
-    end_date = datetime.strptime("31/01/2024", '%d/%m/%Y')
-    cached_data = cache_handler.get_cached_data(start_date, end_date)
-    print(f"Cached Data: {cached_data}")
-
-    # Clear cache
-    cache_handler.clear_cache()
-    print(f"Cache after clearing: {cache_handler.cache}")
