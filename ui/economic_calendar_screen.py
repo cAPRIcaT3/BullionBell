@@ -237,6 +237,9 @@ class EconomicCalendarScreen(wx.Panel):
         """
         Update the table with the entire data and insert flag images in the currency column.
         """
+        # Freeze grid updates to avoid rendering issues while updating the grid
+        self.tableView.Freeze()
+
         # Clear existing data and reset grid
         self.tableView.ClearGrid()
         self.tableView.SetRowLabelSize(0)  # Hide row labels (serial numbers)
@@ -281,6 +284,10 @@ class EconomicCalendarScreen(wx.Panel):
 
         # Resize the window to fit the content
         self.resize_window_to_fit()
+
+        # Thaw grid updates and refresh the table to show all data at once
+        self.tableView.Thaw()
+        self.tableView.ForceRefresh()
 
         self.app.logger.info("Table update complete.")
 
